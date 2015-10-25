@@ -33,7 +33,7 @@ loadData <- function(dataFile) {
 
 loadLibraries <- function(){
   library(ggplot2)
-  library(plyr)
+  # library(plyr)
 }
 
 # All my plot1.R, plot2.r, plot3.R and plot4.R have the same content
@@ -62,20 +62,16 @@ plot2 <- function(NEIData=NULL) {
   dev.off()
 }
 
-# plot 3 line plot
+# plot 3
 plot3 <- function(NEIData=NULL) {
   loadLibraries()
   if(file.exists("summarySCC_PM25.rds")==FALSE) initialdownloadunzip()
   if(is.null(NEIData)) NEIData <- loadData("NEI")
   NEIDataBaltimore<-subset(NEIData, fips == "24510")
-  # png("plot31.png", width=500, height=500)
-  BaltimoreGPlot<-ggplot(aes(x = year, y = Emissions, fill=type), data=NEIDataBaltimore)
-  BaltimoreGPlot+geom_bar(stat="identity")+
-    facet_grid(.~type)+
-    labs(x="year", y="Total PM2.5 Emission in Tons") + 
-    labs(title="PM2.5 Emissions in Baltimore City")+
-    guides(fill=FALSE)
-  # dev.off()
+  png("plot3.png", width=500, height=500)
+  ggp <- ggplot(NEIDataBaltimore,aes(factor(year),Emissions,fill=type)) + theme_bw() + guides(fill=FALSE) + geom_bar(stat="identity") + facet_grid(.~type,scales = "free",space="free") + labs(title=expression("PM"[2.5]*" Emissions in Baltimore City")) + labs(x="year", y=expression("Total PM"[2.5]*" Emission in Tons"))
+  print(ggp)
+  dev.off()
 }
 
 # plot 4 combo
