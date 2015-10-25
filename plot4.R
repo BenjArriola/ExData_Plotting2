@@ -69,35 +69,28 @@ plot3 <- function(NEIData=NULL) {
   if(is.null(NEIData)) NEIData <- loadData("NEI")
   NEIDataBaltimore<-subset(NEIData, fips == "24510")
   png("plot3.png", width=500, height=500)
-  ggp <- ggplot(NEIDataBaltimore,aes(factor(year),Emissions,fill=type)) + theme_bw() + guides(fill=FALSE) + geom_bar(stat="identity") + facet_grid(.~type,scales = "free",space="free") + labs(title=expression("PM"[2.5]*" Emissions in Baltimore City")) + labs(x="year", y=expression("Total PM"[2.5]*" Emission in Tons"))
-  print(ggp)
+  ggplot3 <- ggplot(NEIDataBaltimore,aes(factor(year),Emissions,fill=type)) + theme_bw() + guides(fill=FALSE) + geom_bar(stat="identity") + facet_grid(.~type,scales = "free",space="free") + labs(title=expression("PM"[2.5]*" Emissions in Baltimore City")) + labs(x="year", y=expression("Total PM"[2.5]*" Emission in Tons"))
+  print(ggplot3)
   dev.off()
 }
 
-# plot 4 combo
-plot4 <- function(powerConsumptionData=NULL) {
-  if(file.exists("household_power_consumption.txt")==FALSE) initialdownloadunzip()
-  if(is.null(powerConsumptionData)) powerConsumptionData <- loadData()
-  png("plot4.png", width=400, height=400)
-  par(mfrow=c(2,2))
-  
-  # 1st quadrant
-  plot(powerConsumptionData$Time, powerConsumptionData$Global_active_power, type="l", xlab="", ylab="Global Active Power")
-  
-  # 2nd quadrant
-  plot(powerConsumptionData$Time, powerConsumptionData$Voltage, type="l", xlab="datetime", ylab="Voltage")
-  
-  # 3rd quadrant
-  plot(powerConsumptionData$Time, powerConsumptionData$Sub_metering_1, type="l", col="black", xlab="", ylab="Energy sub metering")
-  lines(powerConsumptionData$Time, powerConsumptionData$Sub_metering_2, col="red")
-  lines(powerConsumptionData$Time, powerConsumptionData$Sub_metering_3, col="blue")
-  legend("topright", col=c("black", "red", "blue"), c("Sub_metering_1", "Sub_metering_2", "Sub_metering_3"), lty=1, box.lwd=0)
-  
-  # 4th quadrant
-  plot(powerConsumptionData$Time, powerConsumptionData$Global_reactive_power, type="n", xlab="datetime", ylab="Global_reactive_power")
-  lines(powerConsumptionData$Time, powerConsumptionData$Global_reactive_power)
+# plot 4
+plot4 <- function(NEIData=NULL,SCCData=NULL) {
+  loadLibraries()
+  if(file.exists("summarySCC_PM25.rds")==FALSE) initialdownloadunzip()
+  if(is.null(NEIData)) NEIData <- loadData("NEI")
+  if(is.null(SCCData)) SCCData <- loadData("SCC")
+  combustionSCCData <- grepl("comb", SCCData$SCC.Level.One, ignore.case=TRUE)
+  coalRelatedSCCData <- grepl("coal", SCCData$SCC.Level.Four, ignore.case=TRUE) 
+  coalCombustionSCCData <- (combustionSCCData & coalRelatedSCCData)
+  combustionSCC <- SCCData[coalCombustionSCCData,]$SCC
+  combustionNEI <- NEIData[NEIData$SCC %in% combustionSCC,]
+  png("plot4.png", width=500, height=500)
+  ggplot4 <- ggplot(combustionNEI,aes(factor(year),Emissions/10^5)) + geom_bar(stat="identity",fill="grey",width=0.75) + theme_bw() +  guides(fill=FALSE) + labs(title=expression("PM"[2.5]*" Coal Combustion Source Emissions Across U.S.")) + labs(x="year", y=expression(Total~PM[2.5]*~Emission~(10^{5}~Tons)))
+  print(ggplot4)
   dev.off()
 }
+
 
 # Plot all, 1 to 4 for faster testing
 plotall <- function(powerConsumptionData=NULL){
@@ -107,4 +100,4 @@ plotall <- function(powerConsumptionData=NULL){
   plot4()
 }
 
-plot3()
+plot4()
