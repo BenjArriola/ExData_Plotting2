@@ -91,13 +91,29 @@ plot4 <- function(NEIData=NULL,SCCData=NULL) {
   dev.off()
 }
 
+# plot 5
+plot5 <- function(NEIData=NULL,SCCData=NULL) {
+  loadLibraries()
+  if(file.exists("summarySCC_PM25.rds")==FALSE) initialdownloadunzip()
+  if(is.null(NEIData)) NEIData <- loadData("NEI")
+  if(is.null(SCCData)) SCCData <- loadData("SCC")
+  vehicles <- grepl("vehicle", SCCData$SCC.Level.Two, ignore.case=TRUE)
+  vehiclesSCCData <- SCCData[vehicles,]$SCC
+  vehiclesNEIData <- NEIData[NEIData$SCC %in% vehiclesSCCData,]
+  vehiclesNEIDataBaltimore <- vehiclesNEIData[vehiclesNEIData$fips==24510,]
+  png("plot5.png", width=500, height=500)
+  ggplot5 <- ggplot(vehiclesNEIDataBaltimore,aes(factor(year),Emissions)) + theme_bw() +  guides(fill=FALSE) + geom_bar(stat="identity",fill="grey",width=0.75) + labs(title=expression("PM"[2.5]*" Motor Vehicle Source Emissions in Baltimore")) + labs(x="year", y=expression(Total~PM[2.5]*~Emission~(10^{5}~Tons)))
+  print(ggplot5)
+  dev.off()
+}
 
-# Plot all, 1 to 4 for faster testing
-plotall <- function(powerConsumptionData=NULL){
+# Plot all for faster testing
+plotall <- function(NEIData=NULL,SCCData=NULL){
   plot1()
   plot2()
   plot3()
   plot4()
+  plot5()
 }
 
 plot3()

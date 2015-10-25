@@ -116,4 +116,4 @@ plotall <- function(NEIData=NULL,SCCData=NULL){
   plot5()
 }
 
-plot2()
+plot5()
