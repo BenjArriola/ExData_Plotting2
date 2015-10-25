@@ -139,4 +139,4 @@ plotall <- function(NEIData=NULL,SCCData=NULL){
   plot6()
 }
 
-plot1()
+plot6()

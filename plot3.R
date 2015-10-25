@@ -107,6 +107,28 @@ plot5 <- function(NEIData=NULL,SCCData=NULL) {
   dev.off()
 }
 
+# plot 6
+plot6 <- function(NEIData=NULL,SCCData=NULL) {
+  loadLibraries()
+  if(file.exists("summarySCC_PM25.rds")==FALSE) initialdownloadunzip()
+  if(is.null(NEIData)) NEIData <- loadData("NEI")
+  if(is.null(SCCData)) SCCData <- loadData("SCC")
+  vehicles <- grepl("vehicle", SCCData$SCC.Level.Two, ignore.case=TRUE)
+  vehiclesSCCData <- SCCData[vehicles,]$SCC
+  vehiclesNEIData <- NEIData[NEIData$SCC %in% vehiclesSCCData,]
+  # Baltimore
+  vehiclesNEIDataBaltimore <- vehiclesNEIData[vehiclesNEIData$fips==24510,]
+  vehiclesNEIDataBaltimore$city <- "Baltimore City"
+  # Los Angeles
+  vehiclesNEIDataLosAngeles <- vehiclesNEIData[vehiclesNEIData$fips=="06037",]
+  vehiclesNEIDataLosAngeles$city <- "Los Angeles County"
+  bothNEI <- rbind(vehiclesNEIDataBaltimore,vehiclesNEIDataLosAngeles)
+  png("plot6.png", width=500, height=500)
+  ggplot6 <- ggplot(bothNEI, aes(x=factor(year), y=Emissions, fill=city)) + geom_bar(aes(fill=year),stat="identity") + guides(fill=FALSE) + theme_bw() + facet_grid(scales="free", space="free", .~city) + labs(title=expression("PM"[2.5]*" Motor Vehicle Source Emissions - Baltimore vs. Los Angeles")) + labs(x="year", y=expression("Total PM"[2.5]*" Emission (Kilo-Tons)"))
+  print(ggplot6)
+  dev.off()
+}
+
 # Plot all for faster testing
 plotall <- function(NEIData=NULL,SCCData=NULL){
   plot1()
@@ -114,6 +136,7 @@ plotall <- function(NEIData=NULL,SCCData=NULL){
   plot3()
   plot4()
   plot5()
+  plot6()
 }
 
 plot3()
